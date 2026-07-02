@@ -1,0 +1,70 @@
+name: ETK Security Scan
+
+# 비용 인식 DevSecOps 게이트:
+#   - PR/push: 무료 정적 티어만 (LLM 0, 매 커밋 부담 없음)
+#   - 수동 실행(workflow_dispatch): LLM 티어 옵션 (예산 상한)
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "scan mode"
+        type: choice
+        options: [static, llm]
+        default: static
+      budget:
+        description: "LLM budget (KRW)"
+        default: "1000"
+
+permissions:
+  contents: read
+  security-events: write   # SARIF 업로드용
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install pyyaml anthropic
+
+      - name: Run security scan (free static tier)
+        id: scan
+        run: |
+          MODE="${{ github.event.inputs.mode || 'static' }}"
+          python scripts/scan.py . \
+            --mode "$MODE" \
+            --budget "${{ github.event.inputs.budget || '1000' }}" \
+            --fail-on high \
+            --sarif results.sarif \
+            --cost cost.json
+        continue-on-error: true   # 게이트 결과와 무관하게 SARIF 업로드
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: results.sarif
+
+      - name: Cost report (비용 인식 증거)
+        if: always()
+        run: |
+          echo "### ETK Scan Cost Report" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat cost.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Enforce gate
+        if: steps.scan.outcome == 'failure'
+        run: |
+          echo "Security gate failed (high+ severity found)"
+          exit 1

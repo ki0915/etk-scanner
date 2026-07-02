@@ -1,0 +1,29 @@
+{
+  "next_id": 4,
+  "packages": {
+    "litellm": {
+      "id": "ETK-CAND-0001",
+      "package": "litellm",
+      "github_url": "https://github.com/BerriAI/litellm",
+      "ecosystem": "pypi",
+      "status": "active",
+      "folder": "C:\\Users\\기민수\\Documents\\Ai_Pentester\\candidates\\ETK-CAND-0001-litellm"
+    },
+    "xmltodict": {
+      "id": "ETK-CAND-0002",
+      "package": "xmltodict",
+      "github_url": "https://github.com/martinblech/xmltodict",
+      "ecosystem": "pypi",
+      "status": "active",
+      "folder": "C:\\Users\\기민수\\Documents\\Ai_Pentester\\candidates\\ETK-CAND-0002-xmltodict"
+    },
+    "validators": {
+      "id": "ETK-CAND-0003",
+      "package": "validators",
+      "github_url": "https://github.com/python-validators/validators",
+      "ecosystem": "pypi",
+      "status": "active",
+      "folder": "C:\\Users\\기민수\\Documents\\Ai_Pentester\\candidates\\ETK-CAND-0003-validators"
+    }
+  }
+}

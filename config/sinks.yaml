@@ -1,0 +1,40 @@
+# 위험 싱크 패턴
+# kind: 취약점 분류
+
+sql:
+  methods: [execute, executemany, raw, query, filter_by, from_statement]
+  free_funcs: []
+
+cmd:
+  methods: [system, popen, execv, execve, run, call, check_call, check_output, Popen]
+  free_funcs: [system, popen]
+  # shell=True 여부는 graph_builder에서 추가 태그
+
+eval_exec:
+  free_funcs: [eval, exec, compile, __import__]
+
+deserialize:
+  # 객체.메서드 형태에서 객체명
+  unsafe_modules: [pickle, marshal, shelve]
+  unsafe_methods: [loads, load]
+  # yaml.load는 별도 처리 (safe_load 제외)
+  yaml_unsafe: [load]
+
+file_write:
+  # open() mode 포함 w/a/x
+  open_write_modes: ["w", "a", "x", "wb", "ab", "xb"]
+
+template:
+  methods: [from_string, render_string, render]
+  dangerous_envs: [Environment, Template]
+  # ImmutableSandboxedEnvironment 는 게이트로 취급
+
+xml_output:
+  # XML 직접 출력 — 태그명/속성값이 검증 없이 삽입되면 XML injection
+  methods: [_write, write, characters, startElement, endElement]
+  # expat 파서 생성 — disable_entities=False면 XXE
+  free_funcs: [ParserCreate]
+
+xml_parse:
+  # 직접 XML 파싱
+  methods: [feed, parse, fromstring, fromstringlist]

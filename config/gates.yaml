@@ -1,0 +1,41 @@
+# 권한 체크 / 입력 검증 게이트 함수 패턴
+# 이 이름이 소스→싱크 경로에 있으면 Stage 3에서 기각
+
+function_names:
+  # 일반 권한 체크
+  - allowed
+  - check_permission
+  - check_permissions
+  - verify_permission
+  - has_permission
+  - require_permission
+  - authorize
+  - authenticate
+  - is_authenticated
+  - is_authorized
+  - login_required
+  - permission_required
+
+  # 입력 검증
+  - validate
+  - validate_input
+  - sanitize
+  - escape
+  - clean
+  - check_input
+  - verify
+
+  # datasette 특화
+  - "datasette.allowed"
+  - "ds.allowed"
+
+  # Django
+  - "request.user.has_perm"
+  - "user.is_authenticated"
+
+  # FastAPI
+  - "get_current_user"
+  - "oauth2_scheme"
+
+  # SQLAlchemy
+  - "text"          # text()로 감싸면 안전하지 않지만 의도적 사용

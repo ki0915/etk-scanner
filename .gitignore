@@ -1,0 +1,38 @@
+# ── 시크릿 (절대 커밋 금지) ──────────────────────────────
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+**/settings.local.json
+*.key
+*.pem
+
+# ── 데이터 / 산출물 ─────────────────────────────────────
+data/
+results.sarif
+cost.json
+bench_*.json
+bench_*.log
+*_metrics.json
+
+# ── 클론된 분석 대상 (용량 큼, 재현은 스크립트로) ──────────
+candidates/*/repo/
+candidates/*/repo
+candidates/**/node_modules/
+
+# ── 파이썬 ──────────────────────────────────────────────
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+
+# ── 노드 ────────────────────────────────────────────────
+node_modules/
+package-lock.json
+
+# ── OS / 에디터 ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+scratchpad/

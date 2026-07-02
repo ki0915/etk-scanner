@@ -1,0 +1,37 @@
+# e2e 보안 검증: MySQL + wiki-backend 앱
+# 사용:
+#   docker compose -f docker/docker-compose.yml up --build -d
+#   ../verify_e2e.sh        # 위조 토큰 HTTP 실증
+#   docker compose -f docker/docker-compose.yml down -v
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: "1111"
+      MYSQL_DATABASE: "test"
+    ports:
+      - "3307:3306"   # 호스트 3307 (로컬 mysql 충돌 회피)
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p1111"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: ../repo/Back-end
+      dockerfile: ../../docker/Dockerfile
+    environment:
+      # 보안: 시크릿을 env로 주입 (수정본의 요구사항)
+      JWT_SECRET: "prod-secret-not-in-git-9f8a7b6c5d"
+      DB_USERNAME: "root"
+      DB_PASSWD: "1111"
+      DB_DBNAME: "test"
+      DB_HOST: "db"
+      PORT: "10000"
+    ports:
+      - "10000:10000"
+    depends_on:
+      db:
+        condition: service_healthy

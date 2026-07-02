@@ -1,0 +1,38 @@
+# 비용 가드레일 설정
+# 환율
+krw_per_usd: 1400
+
+# 총 예산
+total_budget_krw: 8000
+
+# 단계별 상한
+stage2_max_chunks: 600        # Haiku로 보내는 최대 청크 수
+stage4_1_max_candidates: 60   # Sonnet으로 가는 최대 후보
+stage4_2_max_candidates: 25   # Opus로 가는 최대 후보
+
+# 경고 임계값 (예산 대비 비율)
+warn_threshold: 0.80
+
+# 모델 가격 (USD per 1M tokens)
+models:
+  claude-haiku-4-5-20251001:
+    input: 0.80
+    output: 4.00
+    cache_write: 1.00    # 캐시 쓰기 (input의 1.25배)
+    cache_read: 0.08     # 캐시 읽기 (input의 0.1배)
+    batch_discount: 0.50 # 배치 API 할인율
+
+  claude-sonnet-4-6:
+    input: 3.00
+    output: 15.00
+    cache_write: 3.75
+    cache_read: 0.30
+    batch_discount: 0.50
+
+  claude-opus-4-8:
+    input: 15.00
+    output: 75.00
+    cache_write: 18.75
+    cache_read: 1.50
+    batch_discount: 0.50
+    token_overhead: 1.35  # 새 토크나이저 안전계수
