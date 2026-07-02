@@ -36,3 +36,5 @@ package-lock.json
 Thumbs.db
 *.log
 scratchpad/
+bench_data/
+bench_eval_*.json
