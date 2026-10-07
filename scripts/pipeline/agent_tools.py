@@ -16,13 +16,11 @@ from __future__ import annotations
 
 import ast
 import json
-import os
 import re
 import sqlite3
-import subprocess
-import sys
-import tempfile
 from pathlib import Path
+
+from pipeline import sandbox
 
 _BLOCKED_IMPORTS = {"socket", "urllib", "requests", "httpx", "aiohttp",
                     "paramiko", "ftplib", "smtplib", "telnetlib"}
@@ -159,29 +157,14 @@ class ToolBox:
                 return (f"REJECTED: PoC must `import {pkg_root}` and call the REAL function. "
                         f"Do not reimplement the logic — that proves nothing.")
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            poc_file = Path(tmpdir) / "poc.py"
-            poc_file.write_text(code, encoding="utf-8")
-            env = dict(os.environ)
-            # repo 루트 + src 레이아웃 둘 다 PYTHONPATH에 주입
-            paths = [str(self.repo_path.resolve())]
-            src_dir = self.repo_path / "src"
-            if src_dir.is_dir():
-                paths.insert(0, str(src_dir.resolve()))
-            env["PYTHONPATH"] = os.pathsep.join(paths + [env.get("PYTHONPATH", "")])
-            env["PYTHONIOENCODING"] = "utf-8"
-            try:
-                result = subprocess.run(
-                    [sys.executable, str(poc_file)],
-                    capture_output=True, text=True, timeout=timeout, cwd=tmpdir, env=env,
-                    encoding="utf-8", errors="replace",
-                )
-                out = (result.stdout + result.stderr)[:3000]
-                return f"EXIT={result.returncode}\n{out}"
-            except subprocess.TimeoutExpired:
-                return "TIMEOUT (10s)"
-            except Exception as e:
-                return f"ERROR: {e}"
+        # 실행은 격리 컨테이너에서만 (호스트 실행·환경변수 상속 없음).
+        # 위 import 검사는 빠른 피드백용이고, 실제 차단은 --network none 이 담당한다.
+        try:
+            result = sandbox.run_python(
+                code, self.repo_path, sandbox.SandboxConfig(timeout=timeout))
+        except Exception as e:
+            return f"ERROR: {e}"
+        return result.to_tool_text()
 
     # ── 디스패치 ──────────────────────────────────────────────────────────────
 
