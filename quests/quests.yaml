@@ -1,0 +1,81 @@
+# 퀘스트 정의 — docs/AUDIT_AND_ROADMAP.md 8장과 같은 순서
+# verify: 완료 판정 명령 (exit 0 이면 PASS). 없으면 수동 확인 후 --force
+levels:
+  - {xp: 0,   title: "견습"}
+  - {xp: 100, title: "측정가"}
+  - {xp: 250, title: "사냥꾼"}
+  - {xp: 450, title: "증명가"}
+  - {xp: 700, title: "리포터"}
+
+quests:
+  - id: T0-1
+    type: build
+    title: "PoC 실행을 Docker 샌드박스로 옮기고 API 키 전달을 막는다"
+    blocks: 3
+    xp: 40
+    first_step: "tests/test_sandbox.py 에 '샌드박스 안에서 ANTHROPIC_API_KEY 가 보이면 실패' 테스트부터 쓴다"
+    verify: "python -m pytest -q tests/test_sandbox.py"
+  - id: T0-2
+    type: break
+    title: "샌드박스 탈출 시도 5종을 테스트로 만들고 모두 막히는지 확인"
+    blocks: 2
+    xp: 30
+    first_step: "__import__('socket') 으로 외부 연결을 시도하는 테스트 하나부터"
+    verify: "python -m pytest -q tests/test_sandbox.py"
+  - id: T0-3
+    type: build
+    title: "모델 단가 수정 + 모델 ID를 config/models.yaml 한 곳으로"
+    blocks: 2
+    xp: 20
+    first_step: "grep -rn 'claude-' --include=*.py . 로 하드코딩 위치 목록 만들기"
+    verify: "! grep -rqn 'claude-' scripts/pipeline --include=*.py"
+  - id: T0-4
+    type: review
+    title: "프롬프트 캐싱 실측 — 안 걸리면 README 주장 수정"
+    blocks: 1
+    xp: 15
+    first_step: "같은 분류 요청을 두 번 보내고 metrics.json 의 cache_read_tokens 확인"
+  - id: T0-5
+    type: build
+    title: "정본 파이프라인 결정, 나머지는 legacy/ 로 이동, CLAUDE.md 갱신"
+    blocks: 2
+    xp: 20
+    first_step: "run.py / agent_runner.py / worker 중 실제로 쓰는 진입점 하나 고르기"
+    verify: "python scripts/scan.py . --mode static --sarif /tmp/q.sarif --cost /tmp/q.json"
+  - id: T0-6
+    type: build
+    title: "pytest 를 CI에 추가하고 빈 vulnhuntr/ 삭제"
+    blocks: 1
+    xp: 15
+    first_step: "requirements-dev.txt 에 pytest 추가"
+    verify: "test ! -d vulnhuntr && python -m pytest -q"
+  - id: BOSS-0
+    type: boss
+    title: "안전해진 도구로 wiki-backend JWT 위조를 샌드박스에서 재현"
+    blocks: 2
+    xp: 50
+    first_step: "candidates/wiki-backend/verify_e2e.sh 를 샌드박스 경로로 바꿔 실행"
+  - id: T1-1
+    type: learn
+    title: "취약/패치 쌍 평가셋 50쌍 만들기"
+    blocks: 3
+    xp: 40
+    first_step: "공개 CVE 데이터셋에서 Python 쌍 10개만 먼저 bench/pairs/ 로"
+  - id: T1-2
+    type: build
+    title: "bench_eval.py 가 정밀도·재현율·F1·진양성당 비용을 출력"
+    blocks: 2
+    xp: 30
+    first_step: "result.json 스키마부터 정하기"
+  - id: T1-3
+    type: review
+    title: "v1 기준선 점수를 README에 그대로 공개"
+    blocks: 1
+    xp: 20
+    first_step: "bench_eval.py 한 번 실행"
+  - id: BOSS-1
+    type: boss
+    title: "정밀도 X%, 진양성당 Y원을 처음으로 말한다"
+    blocks: 1
+    xp: 50
+    first_step: "README 벤치 표에 숫자 채우기"
